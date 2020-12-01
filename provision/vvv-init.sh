@@ -57,7 +57,7 @@ install_dexerto() {
 
   noroot cp .env.dist .env
   sed -i 's/DB_USER=.*/DB_USER=root/' .env
-  sed -i 's/DB_USER=.*/DB_PASSWORD=root/' .env
+  sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=root/' .env
 
   echo 'Running composer install...'
 
