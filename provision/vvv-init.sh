@@ -100,6 +100,31 @@ copy_nginx_configs() {
   
   echo " * Applying public dir setting to Nginx config"
   noroot sed -i "s#{vvv_public_dir}#/${PUBLIC_DIR}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+
+  LIVE_URL=$(get_config_value 'live_url' '')
+  if [ ! -z "$LIVE_URL" ]; then
+    echo " * Adding support for Live URL redirects to NGINX of the website's media"
+    # replace potential protocols, and remove trailing slashes
+    LIVE_URL=$(echo "${LIVE_URL}" | sed 's|https://||' | sed 's|http://||'  | sed 's:/*$::')
+
+    redirect_config=$((cat <<END_HEREDOC
+if (!-e \$request_filename) {
+  rewrite ^/[_0-9a-zA-Z-]+(/wp-content/uploads/.*) \$1;
+}
+if (!-e \$request_filename) {
+  rewrite ^/wp-content/uploads/(.*)\$ \$scheme://${LIVE_URL}/wp-content/uploads/\$1 redirect;
+}
+END_HEREDOC
+
+    ) |
+    # pipe and escape new lines of the HEREDOC for usage in sed
+    sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n\\1/g'
+    )
+
+    noroot sed -i -e "s|\(.*\){{LIVE_URL}}|\1${redirect_config}|" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+  else
+    noroot sed -i "s#{{LIVE_URL}}##" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+  fi
 }
 
 setup_wp_config_constants(){
