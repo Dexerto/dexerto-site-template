@@ -85,6 +85,7 @@ install_dexerto() {
   echo 'Setting up fixtures...'
 
   noroot wp package install git@github.com:nlemoine/wp-cli-fixtures.git
+  noroot wp fixtures delete
   noroot wp fixtures load
 
   echo 'Installing migration package...'
