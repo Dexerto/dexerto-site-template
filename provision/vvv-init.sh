@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Provision WordPress Stable
+# Provision WordPress
 
 set -eo pipefail
 
