@@ -60,7 +60,7 @@ install_dexerto() {
   sed -i "s/DB_NAME=.*/DB_NAME=${DB_NAME}/" .env
   sed -i "s/DB_USER=.*/DB_USER=root/" .env
   sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=root/" .env
-  sed -i "s/WP_HOME=.*/WP_HOME=${DOMAIN}/" .env
+  sed -i "s/WP_HOME=.*/WP_HOME=https:\/\/${DOMAIN}/" .env
   sed -i "s/WP_MULTISITE_DOMAIN=.*/WP_MULTISITE_DOMAIN=${DOMAIN}/" .env
 
   echo 'Running composer install...'
@@ -79,7 +79,7 @@ install_dexerto() {
 
   echo " * Installing using wp core multisite-install --url=\"${DOMAIN}\" --title=\"${SITE_TITLE}\" --admin_name=\"${ADMIN_USER}\" --admin_email=\"${ADMIN_EMAIL}\" --admin_password=\"${ADMIN_PASSWORD}\""
   
-  noroot wp core multisite-install --url="${DOMAIN}" --title="${SITE_TITLE}" --admin_name="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}"
+  noroot wp core multisite-install --url="https://${DOMAIN}/wp" --title="${SITE_TITLE}" --admin_name="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}"
   noroot wp dictator impose site-state.yml
 
   echo 'Setting up fixtures...'
