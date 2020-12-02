@@ -60,8 +60,8 @@ install_dexerto() {
   sed -i "s/DB_NAME=.*/DB_NAME=${DB_NAME}/" .env
   sed -i "s/DB_USER=.*/DB_USER=root/" .env
   sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=root/" .env
-  sed -i "s/WP_HOME=.*/WP_HOME=${DOMAIN}" .env
-  sed -i "s/WP_MULTISITE_DOMAIN=.*/WP_MULTISITE_DOMAIN=${DOMAIN}" .env
+  sed -i "s/WP_HOME=.*/WP_HOME=${DOMAIN}/" .env
+  sed -i "s/WP_MULTISITE_DOMAIN=.*/WP_MULTISITE_DOMAIN=${DOMAIN}/" .env
 
   echo 'Running composer install...'
 
