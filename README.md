@@ -39,9 +39,9 @@ The default Dexerto WordPress site:
 
 ```yaml
   dexerto:
-    repo: https://github.com/Varying-Vagrant-Vagrants/custom-site-template
+    repo: git@github.com:Dexerto/dexerto-site-template.git
     hosts:
-      - my-site.test
+      - dexerto.docker.hq.boxuk.net
 ```
 
 | Setting    | Value        |
