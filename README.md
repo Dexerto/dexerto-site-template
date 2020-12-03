@@ -1,7 +1,5 @@
 # Dexerto VVV site template
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6fc9d45abb02454aa052771bda2d40ff)](https://www.codacy.com/gh/Varying-Vagrant-Vagrants/custom-site-template?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Varying-Vagrant-Vagrants/custom-site-template&amp;utm_campaign=Badge_Grade)
-
 This tells VVV how to install the Dexerto WordPress project and set up Nginx.
 
  - [Overview](#overview)
