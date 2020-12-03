@@ -2,7 +2,7 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/6fc9d45abb02454aa052771bda2d40ff)](https://www.codacy.com/gh/Varying-Vagrant-Vagrants/custom-site-template?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Varying-Vagrant-Vagrants/custom-site-template&amp;utm_campaign=Badge_Grade)
 
-This tells VVV how to install The Dexerto WordPress project and set up Nginx.
+This tells VVV how to install the Dexerto WordPress project and set up Nginx.
 
  - [Overview](#overview)
  - [Configuration Options](#configuration-options)
@@ -19,16 +19,17 @@ The Nginx configuration for this site can be overriden by creating a `provision/
 
 | Key                      | Default                    | Description                                                                                                                                                                                                                                                                        |
 |--------------------------|----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `admin_email`            | `admin@local.test`         | The email address of the initial admin user                                                                                                                                                                                                                                        |
+| `admin_email`            | `dexerto@boxuk.com`         | The email address of the initial admin user                                                                                                                                                                                                                                        |
 | `admin_password`         | `password`                 | The password for the initial admin user                                                                                                                                                                                                                                            |
-| `admin_user`             | `admin`                    | The name of the initial admin user                                                                                                                                                                                                                                                 |
+| `admin_user`             | `boxadmin`                    | The name of the initial admin user                                                                                                                                                                                                                                                 |
 | `db_name`                | The sites name             | The name of the MySQL database to create and install to                                                                                                                                                                                                                           |
 | `db_prefix`              | `wp_`                      | The WP table prefix                                                                                                                                                                                                                                                               |
 | `delete_default_plugins` | `false`                    | Deletes the Hello Dolly and Akismet plugins on install                                                                                                                                                                                                                             |
 | `install_test_content`   | `false`                    | When first installing WordPress, run the importer and import standard test content from github.com/poststatus/wptest                                                                                                                                                               |
 | `public_dir`             | `public_html`              | Change the default folder inside the website's folder with the WP installation            |
 | `live_url`               |                            | The production site URL, this tells Nginx to redirect requests for assets to the production server if they're not found. This prevents the need to store those assets locally.                                                                                                     |
-| `site_title`             | The first host of the site | The main name/title of the site, defaults to `sitename.test`                                                                                                                                                                                                                       |
+| `site_title`             | Dexerto | The main name/title of the site, defaults to `Dexerto`                                                                                                                                                                                                                       |
+| `dexerto_repo`             | git@github.com:humet/dexerto.git | The SSH link to the Dexerto project repo                                                                                                                                                                                                                       |
 
 ## Examples
 
