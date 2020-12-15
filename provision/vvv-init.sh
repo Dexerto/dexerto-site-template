@@ -81,14 +81,19 @@ install_dexerto() {
   
   noroot wp core multisite-install --url="https://${DOMAIN}/wp" --title="${SITE_TITLE}" --admin_name="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}"
   wp option update home "https://${DOMAIN}"
-  
+  noroot wp site create --slug=fr --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
+  noroot wp language core install fr_FR --activate --url="${DOMAIN}/fr"
+  noroot wp site create --slug=es --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
+  noroot wp language core install es_ES --activate --url="${DOMAIN}/es"
   noroot wp dictator impose site-state.yml
 
   echo 'Setting up fixtures...'
 
   noroot wp package install git@github.com:nlemoine/wp-cli-fixtures.git
   noroot wp fixtures delete
-  noroot wp fixtures load
+  noroot wp fixtures load --file=fixtures-us.yml --url="${DOMAIN}"
+  noroot wp fixtures load --file=fixtures-fr.yml --url="${DOMAIN}/fr"
+  noroot wp fixtures load --file=fixtures-es.yml --url="${DOMAIN}/es"
 
   echo 'Installing migration package...'
 
