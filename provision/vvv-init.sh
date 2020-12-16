@@ -54,9 +54,15 @@ install_dexerto() {
     cd "${PUBLIC_DIR_PATH}"
   fi
 
-  echo 'Setting up .env vars...'
+  ENV_FILE=.env
+  if test -f "$ENV_FILE"; then
+    echo "$FILE already exists."
+  else
+    echo "Creating new .env file."
+    noroot cp .env.dist .env
+  fi
 
-  noroot cp .env.dist .env
+  echo 'Updating .env vars...'
   sed -i "s/DB_NAME=.*/DB_NAME=${DB_NAME}/" .env
   sed -i "s/DB_USER=.*/DB_USER=root/" .env
   sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=root/" .env
