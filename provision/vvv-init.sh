@@ -12,7 +12,7 @@ DB_PREFIX=$(get_config_value 'db_prefix' 'wp_')
 DOMAIN=$(get_primary_host "${VVV_SITE_NAME}".test)
 PUBLIC_DIR=$(get_config_value 'public_dir' "public_html")
 SITE_TITLE=$(get_config_value 'site_title' "Dexerto")
-REPO=$(get_config_value 'dexerto_repo' 'git@github.com:humet/dexerto.git')
+REPO=$(get_config_value 'dexerto_repo' 'git@github.com:Dexerto/dexerto-site.git')
 WP_TYPE="subdirectory"
 
 PUBLIC_DIR_PATH="${VVV_PATH_TO_SITE}"
@@ -46,13 +46,9 @@ install_dexerto() {
   # Check if directoy is empty and ready for cloning
   if [ ! "$(ls -A $PUBLIC_DIR_PATH)" ]; then
     git clone "${REPO}" "${PUBLIC_DIR_PATH}"
-    cd "${PUBLIC_DIR_PATH}"
-
-    # Add upstream repo to git
-    git remote add upstream git@github.com:boxuk/dexerto.git
-  else
-    cd "${PUBLIC_DIR_PATH}"
   fi
+
+  cd "${PUBLIC_DIR_PATH}"
 
   ENV_FILE=.env
   if test -f "$ENV_FILE"; then
@@ -79,9 +75,9 @@ install_dexerto() {
 
   echo 'Proceeding to install WordPress...'
 
-  ADMIN_USER=$(get_config_value 'admin_user' "boxadmin")
+  ADMIN_USER=$(get_config_value 'admin_user' "dexertoadmin")
   ADMIN_PASSWORD=$(get_config_value 'admin_password' "password")
-  ADMIN_EMAIL=$(get_config_value 'admin_email' "dexerto@boxuk.com")
+  ADMIN_EMAIL=$(get_config_value 'admin_email' "webdev@dexerto.com")
 
   echo " * Installing using wp core multisite-install --url=\"${DOMAIN}\" --title=\"${SITE_TITLE}\" --admin_name=\"${ADMIN_USER}\" --admin_email=\"${ADMIN_EMAIL}\" --admin_password=\"${ADMIN_PASSWORD}\""
   
