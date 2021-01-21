@@ -99,8 +99,6 @@ install_wordpress() {
 }
 
 update_wpsettings() {
-  cd "${PUBLIC_DIR}"
-
   echo 'Imposing site state...'
 
   noroot wp dictator impose site-state.yml
@@ -200,7 +198,9 @@ fi
 # Config or update .env
 initial_config
 
-if ! $(noroot wp core is-installed --path=`${PUBLIC_DIR_PATH}` ); then
+cd "${PUBLIC_DIR_PATH}"
+
+if ! $(noroot wp core is-installed); then
     echo " * WordPress is present but isn't installed to the database, checking for SQL dumps in wp-content/database.sql or the main backup folder."
     if [ -f "${PUBLIC_DIR_PATH}/wp-content/database.sql" ]; then
       restore_db_backup "${PUBLIC_DIR_PATH}/wp-content/database.sql"
