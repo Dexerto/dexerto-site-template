@@ -107,12 +107,13 @@ install_wordpress() {
 }
 
 update_wpsettings() {
+  noroot wp cache flush
+  noroot wp option update home "https://${DOMAIN}"
+  noroot wp option update siteurl "https://${DOMAIN}/wp"
+
   echo 'Imposing site state...'
 
   noroot wp dictator impose site-state.yml
-
-  noroot wp option update home "https://${DOMAIN}"
-  noroot wp option update siteurl "https://${DOMAIN}"
 }
 
 copy_nginx_configs() {
