@@ -112,9 +112,7 @@ update_wpsettings() {
   noroot wp dictator impose site-state.yml
 
   noroot wp option update home "https://${DOMAIN}"
-  
-  noroot wp language core install fr_FR --activate --url="${DOMAIN}/fr"
-  noroot wp language core install es_ES --activate --url="${DOMAIN}/es"
+  noroot wp option update siteurl "https://${DOMAIN}"
 }
 
 copy_nginx_configs() {
