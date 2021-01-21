@@ -40,22 +40,34 @@ setup_nginx_folders() {
   noroot mkdir -p "${PUBLIC_DIR_PATH}"
 }
 
-install_dexerto() {
-  echo 'Setting up Dexerto'
+restore_db_backup() {
+  echo " * Found a database backup at ${1}. Restoring the site"
+  noroot wp db import "${1}"
+  echo " * Installed database backup"
+}
 
-  # Check if directoy is empty and ready for cloning
-  if [ ! "$(ls -A $PUBLIC_DIR_PATH)" ]; then
-    git clone "${REPO}" "${PUBLIC_DIR_PATH}"
-  fi
+download_dexerto() {
+  echo 'Downloading Dexerto'
+
+  git clone "${REPO}" "${PUBLIC_DIR_PATH}"
 
   cd "${PUBLIC_DIR_PATH}"
 
+  echo 'Running composer install...'
+
+  noroot composer install
+}
+
+initial_config() {
+  cd "${PUBLIC_DIR_PATH}"
+
   ENV_FILE=.env
-  if test -f "$ENV_FILE"; then
-    echo "$FILE already exists."
-  else
+
+  if [[ ! -f "${PUBLIC_DIR_PATH}/${ENV_FILE}" ]]; then
     echo "Creating new .env file."
     noroot cp .env.dist .env
+  else
+    echo "$ENV_FILE already exists."
   fi
 
   echo 'Updating .env vars...'
@@ -65,14 +77,12 @@ install_dexerto() {
   sed -i "s/WP_HOME=.*/WP_HOME=https:\/\/${DOMAIN}/" .env
   sed -i "s/WP_MULTISITE_DOMAIN=.*/WP_MULTISITE_DOMAIN=${DOMAIN}/" .env
 
-  echo 'Running composer install...'
-
-  noroot composer install
-
   echo 'Setting up object-cache.php...'
 
   noroot cp wp-content/plugins/memcached/object-cache.php wp-content/object-cache.php
+}
 
+install_wordpress() {
   echo 'Proceeding to install WordPress...'
 
   ADMIN_USER=$(get_config_value 'admin_user' "dexertoadmin")
@@ -82,11 +92,17 @@ install_dexerto() {
   echo " * Installing using wp core multisite-install --url=\"${DOMAIN}\" --title=\"${SITE_TITLE}\" --admin_name=\"${ADMIN_USER}\" --admin_email=\"${ADMIN_EMAIL}\" --admin_password=\"${ADMIN_PASSWORD}\""
   
   noroot wp core multisite-install --url="https://${DOMAIN}/wp" --title="${SITE_TITLE}" --admin_name="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}"
-  noroot wp option update home "https://${DOMAIN}"
   noroot wp site create --slug=fr --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
   noroot wp language core install fr_FR --activate --url="${DOMAIN}/fr"
   noroot wp site create --slug=es --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
   noroot wp language core install es_ES --activate --url="${DOMAIN}/es"
+}
+
+update_wpsettings() {
+  cd "${PUBLIC_DIR}"
+
+  echo 'Imposing site state...'
+
   noroot wp dictator impose site-state.yml
 
   echo 'Setting up fixtures...'
@@ -97,9 +113,10 @@ install_dexerto() {
   noroot wp fixtures load --file=fixtures-fr.yml --url="${DOMAIN}/fr"
   noroot wp fixtures load --file=fixtures-es.yml --url="${DOMAIN}/es"
 
-  echo 'Installing migration package...'
+  noroot wp option update home "https://${DOMAIN}"
 
-  noroot wp package install 10up/mu-migration 
+  noroot wp language core install fr_FR --activate --url="${DOMAIN}/fr"
+  noroot wp language core install es_ES --activate --url="${DOMAIN}/es"
 }
 
 copy_nginx_configs() {
@@ -175,7 +192,26 @@ setup_cli
 setup_database
 setup_nginx_folders
 
-install_dexerto
+# If new install
+if [[ ! -f "${PUBLIC_DIR_PATH}/wp/wp-load.php" ]]; then
+  download_dexerto
+fi
+
+# Config or update .env
+initial_config
+
+if ! $(noroot wp core is-installed --path=`${PUBLIC_DIR_PATH}` ); then
+    echo " * WordPress is present but isn't installed to the database, checking for SQL dumps in wp-content/database.sql or the main backup folder."
+    if [ -f "${PUBLIC_DIR_PATH}/wp-content/database.sql" ]; then
+      restore_db_backup "${PUBLIC_DIR_PATH}/wp-content/database.sql"
+    elif [ -f "/srv/database/backups/${VVV_SITE_NAME}.sql" ]; then
+      restore_db_backup "/srv/database/backups/${VVV_SITE_NAME}.sql"
+    else
+      install_wp
+    fi
+fi
+
+update_wpsettings
 
 copy_nginx_configs
 setup_wp_config_constants
