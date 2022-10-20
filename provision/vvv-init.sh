@@ -3,7 +3,7 @@
 
 set -eo pipefail
 
-echo " * Dexerto site template provisioner ${VVV_SITE_NAME}"
+vvv_success " * Dexerto site template provisioner ${VVV_SITE_NAME}"
 
 # fetch the first host as the primary domain. If none is available, generate a default using the site name
 DB_NAME=$(get_config_value 'db_name' "${VVV_SITE_NAME}")
