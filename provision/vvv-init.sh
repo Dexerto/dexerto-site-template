@@ -24,36 +24,36 @@ fi
 
 # Make a database, if we don't already have one
 setup_database() {
-  echo -e " * Creating database '${DB_NAME}' (if it's not already there)"
+  vvv_success -e " * Creating database '${DB_NAME}' (if it's not already there)"
   mysql -u root --password=root -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`"
-  echo -e " * Granting the wp user priviledges to the '${DB_NAME}' database"
+  vvv_success -e " * Granting the wp user priviledges to the '${DB_NAME}' database"
   mysql -u root --password=root -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO wp@localhost IDENTIFIED BY 'wp';"
-  echo -e " * DB operations done."
+  vvv_success -e " * DB operations done."
 }
 
 setup_nginx_folders() {
-  echo " * Setting up the log subfolder for Nginx logs"
+  vvv_success " * Setting up the log subfolder for Nginx logs"
   noroot mkdir -p "${VVV_PATH_TO_SITE}/log"
   noroot touch "${VVV_PATH_TO_SITE}/log/nginx-error.log"
   noroot touch "${VVV_PATH_TO_SITE}/log/nginx-access.log"
-  echo " * Creating the public folder at '${PUBLIC_DIR}' if it doesn't exist already"
+  vvv_success " * Creating the public folder at '${PUBLIC_DIR}' if it doesn't exist already"
   noroot mkdir -p "${PUBLIC_DIR_PATH}"
 }
 
 restore_db_backup() {
-  echo " * Found a database backup at ${1}. Restoring the site"
+  vvv_success " * Found a database backup at ${1}. Restoring the site"
   noroot wp db import "${1}"
-  echo " * Installed database backup"
+  vvv_success " * Installed database backup"
 }
 
 download_dexerto() {
-  echo 'Downloading Dexerto'
+  vvv_success 'Downloading Dexerto'
 
   git clone "${REPO}" "${PUBLIC_DIR_PATH}"
 
   cd "${PUBLIC_DIR_PATH}"
 
-  echo 'Running composer install...'
+  vvv_success 'Running composer install...'
 
   noroot composer install
 }
@@ -64,32 +64,32 @@ initial_config() {
   ENV_FILE=.env
 
   if [[ ! -f "${PUBLIC_DIR_PATH}/${ENV_FILE}" ]]; then
-    echo "Creating new .env file."
+    vvv_success "Creating new .env file."
     noroot cp .env.dist .env
   else
-    echo "$ENV_FILE already exists."
+    vvv_success "$ENV_FILE already exists."
   fi
 
-  echo 'Updating .env vars...'
+  vvv_success 'Updating .env vars...'
   sed -i "s/DB_NAME=.*/DB_NAME=${DB_NAME}/" .env
   sed -i "s/DB_USER=.*/DB_USER=root/" .env
   sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=root/" .env
   sed -i "s/WP_HOME=.*/WP_HOME=https:\/\/${DOMAIN}/" .env
   sed -i "s/WP_MULTISITE_DOMAIN=.*/WP_MULTISITE_DOMAIN=${DOMAIN}/" .env
 
-  echo 'Setting up object-cache.php...'
+  vvv_success 'Setting up object-cache.php...'
 
   noroot cp wp-content/plugins/memcached/object-cache.php wp-content/object-cache.php
 }
 
 install_wordpress() {
-  echo 'Proceeding to install WordPress...'
+  vvv_success 'Proceeding to install WordPress...'
 
   ADMIN_USER=$(get_config_value 'admin_user' "dexertoadmin")
   ADMIN_PASSWORD=$(get_config_value 'admin_password' "password")
   ADMIN_EMAIL=$(get_config_value 'admin_email' "webdev@dexerto.com")
 
-  echo " * Installing using wp core multisite-install --url=\"${DOMAIN}\" --title=\"${SITE_TITLE}\" --admin_name=\"${ADMIN_USER}\" --admin_email=\"${ADMIN_EMAIL}\" --admin_password=\"${ADMIN_PASSWORD}\""
+  vvv_success " * Installing using wp core multisite-install --url=\"${DOMAIN}\" --title=\"${SITE_TITLE}\" --admin_name=\"${ADMIN_USER}\" --admin_email=\"${ADMIN_EMAIL}\" --admin_password=\"${ADMIN_PASSWORD}\""
   
   noroot wp core multisite-install --url="https://${DOMAIN}/wp" --title="${SITE_TITLE}" --admin_name="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}"
   noroot wp site create --slug=fr --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
@@ -97,7 +97,7 @@ install_wordpress() {
   noroot wp site create --slug=es --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
   noroot wp language core install es_ES --activate --url="${DOMAIN}/es"
 
-  echo 'Setting up fixtures...'
+  vvv_success 'Setting up fixtures...'
 
   noroot wp package install git@github.com:nlemoine/wp-cli-fixtures.git
   noroot wp fixtures delete
@@ -111,27 +111,27 @@ update_wpsettings() {
   noroot wp option update home "https://${DOMAIN}"
   noroot wp option update siteurl "https://${DOMAIN}/wp"
 
-  echo 'Imposing site state...'
+  vvv_success 'Imposing site state...'
 
   noroot wp dictator impose site-state.yml
 }
 
 copy_nginx_configs() {
-  echo " * Copying the sites Nginx config template"
+  vvv_success " * Copying the sites Nginx config template"
   if [ -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx-custom.conf" ]; then
-    echo " * A vvv-nginx-custom.conf file was found"
+    vvv_success " * A vvv-nginx-custom.conf file was found"
     noroot cp -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx-custom.conf" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
   else
-    echo " * Using the default vvv-nginx-default.conf, to customize, create a vvv-nginx-custom.conf"
+    vvv_success " * Using the default vvv-nginx-default.conf, to customize, create a vvv-nginx-custom.conf"
     noroot cp -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx-default.conf" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
   fi
   
-  echo " * Applying public dir setting to Nginx config"
+  vvv_success " * Applying public dir setting to Nginx config"
   noroot sed -i "s#{vvv_public_dir}#/${PUBLIC_DIR}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
 
   LIVE_URL=$(get_config_value 'live_url' '')
   if [ ! -z "$LIVE_URL" ]; then
-    echo " * Adding support for Live URL redirects to NGINX of the website's media"
+    vvv_success " * Adding support for Live URL redirects to NGINX of the website's media"
     # replace potential protocols, and remove trailing slashes
     LIVE_URL=$(echo "${LIVE_URL}" | sed 's|https://||' | sed 's|http://||'  | sed 's:/*$::')
 
@@ -161,7 +161,7 @@ setup_wp_config_constants(){
   while IFS='' read -r -d '' key &&
         IFS='' read -r -d '' value; do
       lower_value=$(echo "${value}" | awk '{print tolower($0)}')
-      echo " * Adding constant '${key}' with value '${value}' to wp-config.php"
+      vvv_success " * Adding constant '${key}' with value '${value}' to wp-config.php"
       if [ "${lower_value}" == "true" ] || [ "${lower_value}" == "false" ] || [[ "${lower_value}" =~ ^[+-]?[0-9]*$ ]] || [[ "${lower_value}" =~ ^[+-]?[0-9]+\.?[0-9]*$ ]]; then
         noroot wp config set "${key}" "${value}" --raw
       else
@@ -200,10 +200,12 @@ initial_config
 cd "${PUBLIC_DIR_PATH}"
 
 if ! $(noroot wp core is-installed); then
-    echo " * WordPress is present but isn't installed to the database, checking for SQL dumps in wp-content/database.sql or the main backup folder."
+    vvv_success " * WordPress is present but isn't installed to the database, checking for SQL dumps in wp-content/database.sql or the main backup folder."
     if [ -f "${PUBLIC_DIR_PATH}/wp-content/database.sql" ]; then
+      vvv_success " * Importing SQL dump from wp-content/database.sql"
       restore_db_backup "${PUBLIC_DIR_PATH}/wp-content/database.sql"
     elif [ -f "/srv/database/backups/${VVV_SITE_NAME}.sql" ]; then
+      vvv_success " * Importing SQL dump from /srv/database/backups/${VVV_SITE_NAME}.sql"
       restore_db_backup "/srv/database/backups/${VVV_SITE_NAME}.sql"
     else
       install_wordpress
@@ -215,4 +217,4 @@ update_wpsettings
 copy_nginx_configs
 setup_wp_config_constants
 
-echo " * Dexerto Site Template provisioner script completed for ${VVV_SITE_NAME}"
+vvv_success " * Dexerto Site Template provisioner script completed for ${VVV_SITE_NAME}"
