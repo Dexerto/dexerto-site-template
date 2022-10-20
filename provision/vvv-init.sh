@@ -206,7 +206,7 @@ if ! $(noroot wp core is-installed); then
     elif [ -f "/srv/database/backups/${VVV_SITE_NAME}.sql" ]; then
       restore_db_backup "/srv/database/backups/${VVV_SITE_NAME}.sql"
     else
-      install_wp
+      install_wordpress
     fi
 fi
 
