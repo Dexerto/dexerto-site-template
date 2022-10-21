@@ -31,8 +31,10 @@ The Nginx configuration for this site can be overriden by creating a `provision/
   - ***WARNING*** indentation is critical for yaml files.
 - In the terminal navigate to vvv-local/www/dexerto/public_html.
 - Type the following command ```vagrant plugin install vagrant-parallels```.
+- Add an auth.json file to vvv-local/www/dexerto/public_html with the correct keys.
 - Type ```vagrant up```
 - ***Warning*** any changes made to the vagrant config must be followed by ```vagrant reload --provision```
+- The following file vvv-local/www/dexerto/public_html/wp-content/mu-plugins/000-boxuk-init.php line 17-19 may contain code that breaks the provisioner, comment this out and run ```vagrant reload --provision```.
 
 ## Configuration Options
 
