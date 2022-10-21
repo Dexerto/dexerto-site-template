@@ -3,6 +3,7 @@
 This tells VVV how to install the Dexerto WordPress project and set up Nginx.
 
  - [Overview](#overview)
+ - [ARM Mac setup](#arm-mac-setup)
  - [Configuration Options](#configuration-options)
  - [Examples](#examples)
 
@@ -11,6 +12,27 @@ This tells VVV how to install the Dexerto WordPress project and set up Nginx.
 This template will allow you to create the Dexerto WordPress dev environment using only `config/config.yml`.
 
 The Nginx configuration for this site can be overriden by creating a `provision/vvv-nginx-custom.conf`.
+
+## ARM Mac Setup 
+
+- Install and set up [homebrew](https://brew.sh/).
+- In the terminal type the following commands:
+  - ``` brew install parallels```
+  - ``` brew install vagrant```
+- Open up parallels and sign up to a pro or business account.
+- Follow the [vvv installation instructions](https://varyingvagrantvagrants.org/docs/en-US/installation/).
+- Once the vvv-local file is installed, navigate to vvv-local/config/config.yml.
+  - Add the following lines into where the sites are located:
+  - ```
+    dexerto:
+    repo: git@github.com:Dexerto/dexerto-site-template.git
+    hosts:
+      - dexerto.test
+  - ***WARNING*** indentation is critical for yaml files.
+- In the terminal navigate to vvv-local/www/dexerto/public_html.
+- Type the following command ```vagrant plugin install vagrant-parallels```.
+- Type ```vagrant up```
+- ***Warning*** any changes made to the vagrant config must be followed by ```vagrant reload --provision```
 
 ## Configuration Options
 
