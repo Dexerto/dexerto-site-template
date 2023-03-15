@@ -85,7 +85,7 @@ install_wordpress() {
 
   vvv_success " * Installing using wp core multisite-install --url=\"${DOMAIN}\" --title=\"${SITE_TITLE}\" --admin_name=\"${ADMIN_USER}\" --admin_email=\"${ADMIN_EMAIL}\" --admin_password=\"${ADMIN_PASSWORD}\""
   
-  noroot wp core multisite-install --url="https://${DOMAIN}/wp" --title="${SITE_TITLE}" --admin_name="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}" --path="${PUBLIC_DIR_PATH}/wp"
+  noroot wp core multisite-install --url="${DOMAIN}" --title="${SITE_TITLE}" --admin_name="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}" --path="${PUBLIC_DIR_PATH}/wp"
   noroot wp site create --slug=fr --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
   noroot wp language core install fr_FR --activate --url="${DOMAIN}/fr"
   noroot wp site create --slug=es --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
