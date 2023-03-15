@@ -50,12 +50,6 @@ download_dexerto() {
   vvv_success 'Downloading Dexerto'
 
   git clone "${REPO}" "${PUBLIC_DIR_PATH}"
-
-  cd "${PUBLIC_DIR_PATH}"
-
-  vvv_success 'Running composer install...'
-
-  noroot composer install
 }
 
 initial_config() {
@@ -194,10 +188,14 @@ if [[ ! -f "${PUBLIC_DIR_PATH}/wp/wp-load.php" ]]; then
   download_dexerto
 fi
 
+cd "${PUBLIC_DIR_PATH}"
+
+vvv_success 'Running composer install...'
+
+noroot composer install
+
 # Config or update .env
 initial_config
-
-cd "${PUBLIC_DIR_PATH}"
 
 if ! $(noroot wp core is-installed); then
     vvv_success " * WordPress is present but isn't installed to the database, checking for SQL dumps in wp-content/database.sql or the main backup folder."
