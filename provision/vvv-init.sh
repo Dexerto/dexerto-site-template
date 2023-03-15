@@ -211,7 +211,9 @@ if [ $? -ne 0 ]; then
     fi
 
     # Check if WordPress is installed
-    if noroot wp core is-installed; then
+    noroot wp core is-installed
+    wp_installed=$?
+    if [ $wp_installed -eq 0 ]; then
       vvv_success "WordPress is installed successfully."
     else
       vvv_error "WordPress installation failed. Please check the script and try again."
