@@ -85,10 +85,10 @@ install_wordpress() {
 
   vvv_success " * Installing using wp core multisite-install --url=\"${DOMAIN}\" --title=\"${SITE_TITLE}\" --admin_name=\"${ADMIN_USER}\" --admin_email=\"${ADMIN_EMAIL}\" --admin_password=\"${ADMIN_PASSWORD}\""
   
-  noroot wp core multisite-install --url="${DOMAIN}" --title="${SITE_TITLE}" --admin_name="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}" --path="${PUBLIC_DIR_PATH}/wp"
+  noroot wp core multisite-install --url="${DOMAIN}" --title="${SITE_TITLE}" --admin_name="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}"
   noroot wp site create --slug=fr --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
   noroot wp language core install fr_FR --activate --url="${DOMAIN}/fr"
-  noroot wp site create --slug=es --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
+  noroot wp site create --slug=es --title="Dexerto (ES)" --email="${ADMIN_EMAIL}"
   noroot wp language core install es_ES --activate --url="${DOMAIN}/es"
 
   vvv_success 'Setting up fixtures...'
@@ -190,7 +190,7 @@ fi
 
 cd "${PUBLIC_DIR_PATH}"
 
-vvv_success 'Running composer install...'
+vvv_info 'Running composer install...'
 
 noroot composer install
 
@@ -199,15 +199,23 @@ initial_config
 
 noroot wp core is-installed
 if [ $? -ne 0 ]; then
-    vvv_success " * WordPress is present but isn't installed to the database, checking for SQL dumps in wp-content/database.sql or the main backup folder."
+    vvv_info " * WordPress is present but isn't installed to the database, checking for SQL dumps in wp-content/database.sql or the main backup folder."
     if [ -f "${PUBLIC_DIR_PATH}/wp-content/database.sql" ]; then
-      vvv_success " * Importing SQL dump from wp-content/database.sql"
+      vvv_info " * Importing SQL dump from wp-content/database.sql"
       restore_db_backup "${PUBLIC_DIR_PATH}/wp-content/database.sql"
     elif [ -f "/srv/database/backups/${VVV_SITE_NAME}.sql" ]; then
-      vvv_success " * Importing SQL dump from /srv/database/backups/${VVV_SITE_NAME}.sql"
+      vvv_info " * Importing SQL dump from /srv/database/backups/${VVV_SITE_NAME}.sql"
       restore_db_backup "/srv/database/backups/${VVV_SITE_NAME}.sql"
     else
       install_wordpress
+    fi
+
+    # Check if WordPress is installed
+    if noroot wp core is-installed; then
+      vvv_success "WordPress is installed successfully."
+    else
+      vvv_error "WordPress installation failed. Please check the script and try again."
+      exit 1
     fi
 fi
 
