@@ -209,11 +209,9 @@ noroot composer install
 # Config or update .env
 initial_config
 
-noroot wp core is-installed
+vvv_info " * Checking if WordPress is installed"
 
-vvv_success " * WordPress status \"${wp_installed}\""
-
-if [ $? -ne 0 ]; then
+if ! noroot wp core is-installed; then
     vvv_info " * WordPress is present but isn't installed to the database, checking for SQL dumps in wp-content/database.sql or the main backup folder."
     if [ -f "${PUBLIC_DIR_PATH}/wp-content/database.sql" ]; then
       vvv_info " * Importing SQL dump from wp-content/database.sql"
