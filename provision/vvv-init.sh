@@ -13,7 +13,7 @@ DOMAIN=$(get_primary_host "${VVV_SITE_NAME}".test)
 PUBLIC_DIR=$(get_config_value 'public_dir' "public_html")
 SITE_TITLE=$(get_config_value 'site_title' "Dexerto")
 REPO=$(get_config_value 'dexerto_repo' 'git@github.com:Dexerto/dexerto-site.git')
-WP_TYPE="subdirectory"
+WP_TYPE=$(get_config_value 'wp_type' "single")
 
 PUBLIC_DIR_PATH="${VVV_PATH_TO_SITE}"
 if [ ! -z "${PUBLIC_DIR}" ]; then
@@ -83,21 +83,33 @@ install_wordpress() {
   ADMIN_PASSWORD=$(get_config_value 'admin_password' "password")
   ADMIN_EMAIL=$(get_config_value 'admin_email' "webdev@dexerto.com")
 
-  vvv_info " * Installing using wp core multisite-install --url=\"${DOMAIN}\" --title=\"${SITE_TITLE}\" --admin_name=\"${ADMIN_USER}\" --admin_email=\"${ADMIN_EMAIL}\" --admin_password=\"${ADMIN_PASSWORD}\""
-  
-  noroot wp core multisite-install --url="${DOMAIN}" --title="${SITE_TITLE}" --admin_name="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}"
-  noroot wp site create --slug=fr --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
-  noroot wp language core install fr_FR --activate --url="${DOMAIN}/fr"
-  noroot wp site create --slug=es --title="Dexerto (ES)" --email="${ADMIN_EMAIL}"
-  noroot wp language core install es_ES --activate --url="${DOMAIN}/es"
+  if [ "$WP_TYPE" = "single" ]; then
+    vvv_info " * Installing single site using wp core install --url=\"${DOMAIN}\" --title=\"${SITE_TITLE}\" --admin_user=\"${ADMIN_USER}\" --admin_email=\"${ADMIN_EMAIL}\" --admin_password=\"${ADMIN_PASSWORD}\""
+    noroot wp core install --url="${DOMAIN}" --title="${SITE_TITLE}" --admin_user="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}"
+
+  elif [ "$WP_TYPE" = "multisite" ]; then
+    vvv_info " * Installing multisite using wp core multisite-install --url=\"${DOMAIN}\" --title=\"${SITE_TITLE}\" --admin_name=\"${ADMIN_USER}\" --admin_email=\"${ADMIN_EMAIL}\" --admin_password=\"${ADMIN_PASSWORD}\""
+
+    noroot wp core multisite-install --url="${DOMAIN}" --title="${SITE_TITLE}" --admin_name="${ADMIN_USER}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}"
+    noroot wp site create --slug=fr --title="Dexerto (FR)" --email="${ADMIN_EMAIL}"
+    noroot wp language core install fr_FR --activate --url="${DOMAIN}/fr"
+    noroot wp site create --slug=es --title="Dexerto (ES)" --email="${ADMIN_EMAIL}"
+    noroot wp language core install es_ES --activate --url="${DOMAIN}/es"
+  else
+    vvv_error "Invalid value for wp_type. It should be either 'single' or 'multisite'."
+    return 1
+  fi
 
   vvv_info 'Setting up fixtures...'
 
   noroot wp package install git@github.com:nlemoine/wp-cli-fixtures.git
   noroot wp fixtures delete
   noroot wp fixtures load --file=fixtures-us.yml --url="${DOMAIN}"
-  noroot wp fixtures load --file=fixtures-fr.yml --url="${DOMAIN}/fr"
-  noroot wp fixtures load --file=fixtures-es.yml --url="${DOMAIN}/es"
+
+  if [ "$WP_TYPE" = "multisite" ]; then
+    noroot wp fixtures load --file=fixtures-fr.yml --url="${DOMAIN}/fr"
+    noroot wp fixtures load --file=fixtures-es.yml --url="${DOMAIN}/es"
+  fi
 }
 
 update_wpsettings() {
