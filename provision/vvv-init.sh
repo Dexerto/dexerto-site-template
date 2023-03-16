@@ -231,6 +231,8 @@ if [ $? -ne 0 ]; then
       vvv_error "WordPress installation failed. Please check the script and try again."
       exit 1
     fi
+else
+    vvv_info " * WordPress is already installed, skipping installation."
 fi
 
 update_wpsettings
