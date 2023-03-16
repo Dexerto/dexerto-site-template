@@ -24,11 +24,11 @@ fi
 
 # Make a database, if we don't already have one
 setup_database() {
-  vvv_info -e " * Creating database '${DB_NAME}' (if it's not already there)"
+  vvv_info "* Creating database '${DB_NAME}' (if it's not already there)"
   mysql -u root --password=root -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`"
-  vvv_info -e " * Granting the wp user priviledges to the '${DB_NAME}' database"
+  vvv_info "* Granting the wp user priviledges to the '${DB_NAME}' database"
   mysql -u root --password=root -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO wp@localhost IDENTIFIED BY 'wp';"
-  vvv_success -e " * DB operations done."
+  vvv_success "* DB operations done."
 }
 
 setup_nginx_folders() {
