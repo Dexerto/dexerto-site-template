@@ -28,7 +28,7 @@ setup_database() {
   mysql -u root --password=root -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`"
   vvv_info "* Granting the wp user priviledges to the '${DB_NAME}' database"
   mysql -u root --password=root -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO wp@localhost IDENTIFIED BY 'wp';"
-  vvv_success "* DB operations done."
+  vvv_success "✔ DB operations done."
 }
 
 setup_nginx_folders() {
@@ -43,7 +43,7 @@ setup_nginx_folders() {
 restore_db_backup() {
   vvv_info " * Found a database backup at ${1}. Restoring the site"
   noroot wp db import "${1}"
-  vvv_success " * Installed database backup"
+  vvv_success "✔ Installed database backup"
 }
 
 download_dexerto() {
@@ -119,7 +119,13 @@ update_wpsettings() {
 
   vvv_info 'Imposing site state...'
 
-  noroot wp dictator impose site-state.yml
+  if noroot wp core is-installed --network; then
+    vvv_info " * Running dictator impose on site-state-network.yml"
+    noroot wp dictator impose site-state-network.yml
+  else
+    vvv_info " * Running dictator impose on site-state-single.yml"
+    noroot wp dictator impose site-state-single.yml
+  fi
 }
 
 copy_nginx_configs() {
@@ -213,8 +219,6 @@ vvv_info " * Checking if WordPress is installed"
 noroot wp core is-installed
 wp_installed=$?
 
-vvv_info " * WordPress is installed: $wp_installed"
-
 if [ $wp_installed -eq 1 ]; then
     vvv_info " * WordPress is present but isn't installed to the database, checking for SQL dumps in wp-content/database.sql or the main backup folder."
     if [ -f "${PUBLIC_DIR_PATH}/wp-content/database.sql" ]; then
@@ -231,7 +235,7 @@ if [ $wp_installed -eq 1 ]; then
     noroot wp core is-installed
     wp_installed=$?
     if [ $wp_installed -eq 0 ]; then
-      vvv_success "WordPress is installed successfully."
+      vvv_success "✔ WordPress is installed successfully."
     else
       vvv_error "WordPress installation failed. Please check the script and try again."
       exit 1
@@ -245,4 +249,4 @@ update_wpsettings
 copy_nginx_configs
 setup_wp_config_constants
 
-vvv_success " * Dexerto Site Template provisioner script completed for ${VVV_SITE_NAME}"
+vvv_success "✔ Dexerto Site Template provisioner script completed for ${VVV_SITE_NAME}"
